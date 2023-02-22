@@ -26,14 +26,10 @@ m_t = 12345;% integral of m_flow
 momentum_e = (m_t-m_0)*v_e;
 
 % Framdrivningsacceleration
-m_e = 12345; % Integrera 0 till t för m_flow!
-a_e = 12345; % Integrera fram?
-a_prop = (m_flow*(v_e + v) + m_e*a_e) / (m_0-m_e) % v is the result of integration over a!
-a_g = [0; -g];
-a_luft = [0; 0]; % Ändra sen
-a = a_prop + a_luft + a_g;
+a_prop
+a_luft = [0; 0; 0]; % Ändra sen
+a_tot = a_prop + a_luft + a_g;
 
-%{
 % Uträkning
 speed0 = 10; % räkna ut sen
 v0 = speed0 * [cosd(angle) sind(angle)]; 
@@ -56,4 +52,3 @@ function P = get_position(v, a, tVec)
     P(1, :) = v(1).*tVec + a(1)*0.5.*tVec.*tVec;
     P(2, :) = v(2).*tVec + a(2)*0.5.*tVec.*tVec;
 end
-%}
