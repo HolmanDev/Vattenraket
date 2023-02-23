@@ -17,12 +17,25 @@ cd = 1; % "Discharge coefficient [dimensionslös]
 p_air = 300000; %! MÅSTE RÄKNAS UT [N/m^2]
 
 % Hastighet
-N = 250000;
+N = 70000;
 dt = 0.0001;
 v_vec = Velocity(N, dt, m_rocket, m_fuel, g, p_0, p_air, density_water, A_nozzle, cd);
 t_vec = 0:dt:(N*dt);
 figure(1)
 plot(t_vec, v_vec(2, :)); % v_y over time
+title("Velocity")
+xlabel("t [s]")
+ylabel("v_y [m/s]")
+hold on;
+yline(0);
+hold off
+
+% First seconds velocity
+figure(2)
+v_y_vec = v_vec(2, :);
+T = 0.5;
+plot(t_vec(1:T/dt), v_y_vec(1:T/dt)); % v_y over time
+title("Velocity", "first " + T + " seconds")
 xlabel("t [s]")
 ylabel("v_y [m/s]")
 hold on;
@@ -34,10 +47,27 @@ s_vec = [0;0];
 for i=1:N
     s_vec(:, i+1) = s_vec(:, i) + v_vec(:, i)*dt;
 end
-figure(2)
+figure(3)
 plot(s_vec(1, :), s_vec(2, :));
+title("Position")
 xlabel("x [m]")
 ylabel("y [m]")
 hold on
+yline(0);
+hold off
+
+% Acceleration
+a_vec = zeros(2, N-1);
+for i=1:(N-1)
+    a_vec(:, i) = (v_y_vec(:, i+1) - v_y_vec(:, i))/dt;
+end
+figure(4)
+a_t_vec = t_vec(1:N-1);
+a_y_vec = a_vec(2, :);
+plot(a_t_vec(1:(T/dt)), a_y_vec(1:(T/dt))); % v_y over time
+title("Acceleration", "first " + T + " seconds")
+xlabel("t [s]")
+ylabel("a_y [m/s^2]")
+hold on;
 yline(0);
 hold off
