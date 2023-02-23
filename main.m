@@ -5,8 +5,8 @@ kelvin_celsius_offset = 273.15;
 p_0 = 101300; % [N/m^2]
 
 % Variabler
+V_water = 0.001; % 1 liter [m^3]
 angle = 45; % Uppskjutningsvinkel [deg]
-p = 100; % Lufttryck i raketen [N/m^2]
 T_C = 20; % [C]
 T_K = T_C + kelvin_celsius_offset; % [K]
 m_rocket = 0.1; % Raketmassa [kg]
@@ -16,44 +16,28 @@ A_nozzle = r_nozzle * r_nozzle * pi; % Mynningsarea [m^2]
 cd = 1; % "Discharge coefficient [dimensionslös]
 p_air = 300000; %! MÅSTE RÄKNAS UT [N/m^2]
 
-% Räkna ut massflöde genom mynningen
-delta_p = p_air-p_0;
-v_e = cd * sqrt(2*delta_p/density_water);
-m_flow = v_e * density_water * A_nozzle;
-% Exhaust momentum
-m_0 = m_rocket + m_fuel;
-m_t = 12345;% integral of m_flow
-momentum_e = (m_t-m_0)*v_e;
+% Hastighet
+N = 250000;
+dt = 0.0001;
+v_vec = Velocity(N, dt, m_rocket, m_fuel, g, p_0, p_air, density_water, A_nozzle, cd);
+t_vec = 0:dt:(N*dt);
+figure(1)
+plot(t_vec, v_vec(2, :)); % v_y over time
+xlabel("t [s]")
+ylabel("v_y [m/s]")
+hold on;
+yline(0);
+hold off
 
-% Framdrivningsacceleration
-m_e = 12345; % Integrera 0 till t för m_flow!
-a_e = 12345; % Integrera fram?
-a_prop = (m_flow*(v_e + v) + m_e*a_e) / (m_0-m_e) % v is the result of integration over a!
-a_g = [0; -g];
-a_luft = [0; 0]; % Ändra sen
-a = a_prop + a_luft + a_g;
-
-%{
-% Uträkning
-speed0 = 10; % räkna ut sen
-v0 = speed0 * [cosd(angle) sind(angle)]; 
-% v_y*t - (g*t^2)/2 = 0
-% t^2 - (2/g)*v_y*t = 0
-% t = (2/g)*v_y
-t = v0(2) * 2/g;
-d = v0(1) * t; % Nu räknar jag bara första kicken
-tVec = linspace(0, t, 20);
-a = [0 -g];
-P = get_position(v0, a, tVec);
-plot(P(1, :), P(2, :));
-disp("Max höjd: " + max(P(2, :)) + "m")
-
-% d = Integral(v_x * dx)
-
-function P = get_position(v, a, tVec)
-    n = size(tVec, 2);
-    P = zeros(2, n);
-    P(1, :) = v(1).*tVec + a(1)*0.5.*tVec.*tVec;
-    P(2, :) = v(2).*tVec + a(2)*0.5.*tVec.*tVec;
+% Position
+s_vec = [0;0];
+for i=1:N
+    s_vec(:, i+1) = s_vec(:, i) + v_vec(:, i)*dt;
 end
-%}
+figure(2)
+plot(s_vec(1, :), s_vec(2, :));
+xlabel("x [m]")
+ylabel("y [m]")
+hold on
+yline(0);
+hold off

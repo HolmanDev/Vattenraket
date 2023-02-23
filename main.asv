@@ -5,8 +5,9 @@ kelvin_celsius_offset = 273.15;
 p_0 = 101300; % [N/m^2]
 
 % Variabler
+V_water = 0.001; % 1 liter [m^3]
 angle = 45; % Uppskjutningsvinkel [deg]
-p = 100; % Lufttryck i raketen [N/m^2]
+%p = 100; % Lufttryck i raketen [N/m^2]
 T_C = 20; % [C]
 T_K = T_C + kelvin_celsius_offset; % [K]
 m_rocket = 0.1; % Raketmassa [kg]
@@ -21,15 +22,28 @@ delta_p = p_air-p_0;
 v_e = cd * sqrt(2*delta_p/density_water);
 m_flow = v_e * density_water * A_nozzle;
 % Exhaust momentum
+m_fuel = density_water * V_water;
 m_0 = m_rocket + m_fuel;
 m_t = 12345;% integral of m_flow
 momentum_e = (m_t-m_0)*v_e;
 
 % Framdrivningsacceleration
-a_prop
-a_luft = [0; 0; 0]; % Ändra sen
-a_tot = a_prop + a_luft + a_g;
+m_e = 12345; % Integrera 0 till t för m_flow!
+a_e = 12345; % Integrera fram?
+%a_prop = (m_flow*(v_e + v) + m_e*a_e) / (m_0-m_e); % v is the result of integration over a!
+N = 2500;
+dt = 0.01;
+v_vec = Velocity(N, dt, m_rocket, m_fuel, g, p_0, p_air, density_water, A_nozzle, cd);
+t_vec = 0:dt:(N*dt);
+plot(t_vec, v_vec(2, :)); % v_y over time
+hold on;
+yline(0);
 
+% Displacement
+s_vec = [0;0];
+for i=
+
+%{
 % Uträkning
 speed0 = 10; % räkna ut sen
 v0 = speed0 * [cosd(angle) sind(angle)]; 
@@ -52,3 +66,4 @@ function P = get_position(v, a, tVec)
     P(1, :) = v(1).*tVec + a(1)*0.5.*tVec.*tVec;
     P(2, :) = v(2).*tVec + a(2)*0.5.*tVec.*tVec;
 end
+%}
