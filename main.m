@@ -8,7 +8,7 @@ V_bottle = 0.00157; % [m^3]
 figure('Position', [100 100 900 600]);
 
 n_tests = 5;
-volumes = linspace(0.0006, 0.00095, n_tests);
+volumes = linspace(0.0006, 0.0008, n_tests); % 0.8L verkar vara bäst
 for v_i = 1:n_tests  
     % Variabler
     p_air_0 = 800000;
@@ -27,7 +27,8 @@ for v_i = 1:n_tests
     % Hastighet
     N = 90000;
     dt = 0.0001;
-    [a_vec, v_vec, s_vec, m_flow_vec] = FlightIntegral(N, dt, V_air_0, m_rocket, m_fuel, p_0, p_air_0, density_water, A_nozzle, C_discharge);
+    % Create a new method, from the ground up...
+    [a_vec, v_vec, s_vec, m_flow_vec] = FlightIntegral(N, dt, V_air_0, m_rocket, m_fuel, p_0, p_air_0, density_water, A_nozzle, C_discharge, angle);
     N = length(s_vec) - 1;
     t_vec = 0:dt:(N*dt);
     subplot(2, 3, 1);

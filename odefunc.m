@@ -1,4 +1,4 @@
-function dsdt = odefunc(t, vel, dt, V_air_0, m_rocket, m_fuel, p_0, p_air, density_water, A_nozzle, C_discharge)
+function dsdt = odefunc(t, vel, dt, V_air_0, m_rocket, m_fuel, p_0, p_air, density_water, A_nozzle, C_discharge, angle)
     % vel = y
     g = 9.82; % [m/s^2]
     m_0 = m_rocket + m_fuel;
