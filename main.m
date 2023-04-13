@@ -1,14 +1,14 @@
 % Konstanter
 g = 9.82; % [m/s^2]
-density_water = 997.13; % [kg/m^3]
+density_water = 1000; % [kg/m^3]
 kelvin_celsius_offset = 273.15;
-p_0 = 101300; % [N/m^2]
+p_atm = 102400; % [N/m^2]
 V_bottle = 0.00157; % [m^3]
 
 figure('Position', [100 100 900 600]);
 
-n_tests = 5;
-volumes = linspace(0.0006, 0.0008, n_tests); % 0.8L verkar vara bäst
+n_tests = 4;
+volumes = linspace(0.0004, 0.0010, n_tests); % 0.8L verkar vara bäst
 for v_i = 1:n_tests  
     % Variabler
     p_air_0 = 800000;
@@ -17,7 +17,7 @@ for v_i = 1:n_tests
     angle = 45; % Uppskjutningsvinkel [deg]
     m_rocket = 0.2; % Raketmassa [kg]
     m_fuel = V_water * density_water; %! Add air mass?
-    T_C = 20; % [C]
+    T_C = -1; % [C]
     T_K = T_C + kelvin_celsius_offset; % [K]
     r_nozzle = 0.01025; % Mynningsradie [m]
     d_nozzle = 2*r_nozzle; % Mynningsdiameter [m]
@@ -28,7 +28,8 @@ for v_i = 1:n_tests
     N = 90000;
     dt = 0.0001;
     % Create a new method, from the ground up...
-    [a_vec, v_vec, s_vec, m_flow_vec] = FlightIntegral(N, dt, V_air_0, m_rocket, m_fuel, p_0, p_air_0, density_water, A_nozzle, C_discharge, angle);
+
+    [a_vec, v_vec, s_vec, m_flow_vec] = FlightIntegral(N, dt, V_air_0, m_rocket, m_fuel, p_atm, p_air_0, density_water, A_nozzle, C_discharge, angle);
     N = length(s_vec) - 1;
     t_vec = 0:dt:(N*dt);
     subplot(2, 3, 1);
