@@ -45,7 +45,7 @@ function [a_vec, v_vec, s_vec, m_flow_vec] = FlightIntegral(N, dt, V_air_0, m_ro
         p_water = p_air + extra_water_pressure;
         p_exhaust = p_atm;
         k = water_vapour_gamma / (water_vapour_gamma - 1);
-        v_e = -local_up * C_discharge * sqrt(abs(2*k*(p_exhaust/density_exhaust - p_water/density_water) / ((density_exhaust/density_water)^2 * beta^4 - 1))); % I think this is the best equation
+        v_e = -local_up * C_discharge * sqrt(2*k*(p_exhaust/density_exhaust - p_water/density_water) / ((density_exhaust/density_water)^2 * beta^4 - 1)); % I think this is the best equation
         %v_e = -local_up * C_discharge * sqrt(2 * k * (p_water/density_water - p_exhaust/density_exhaust));
         % Using (scuffed) thermodynamics:
         %old_v_e = v_e;
