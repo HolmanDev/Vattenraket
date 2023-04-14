@@ -1,3 +1,5 @@
+clear;
+
 % Konstanter
 g = 9.82; % [m/s^2]
 density_water = 1000; % [kg/m^3]

@@ -9,7 +9,6 @@ function dy = ODESystem(t, y, p_air_0, R_spec_air, T, V_air_0, adiabatic_index_a
     if t < 0.05
         local_up = [cosd(angle); sind(angle)];
     end
-    m_tot = m_body + m_fuel_0 - m_e_water; % Air isn't counted (fix!)
     v_e_water_vec = [0; 0];
     v_e_air_vec = [0; 0];
     m_flow_air = 0;
@@ -25,6 +24,7 @@ function dy = ODESystem(t, y, p_air_0, R_spec_air, T, V_air_0, adiabatic_index_a
     % Mass flow in different stages of flight
     is_empty = m_e_water >= m_fuel_0;
     if is_empty
+        m_e_water = m_fuel_0;
         if p_air > p_atm
             delta_p = p_air - p_atm;
             if delta_p < 0 % Prevent backwards flow weirdness
@@ -57,6 +57,8 @@ function dy = ODESystem(t, y, p_air_0, R_spec_air, T, V_air_0, adiabatic_index_a
         m_flow_air = 0;
     end
     delta_V_air = m_flow_water / density_w;
+    m_e_water = max(0, m_e_water);
+    m_tot = m_body + m_fuel_0 - m_e_water; % Air isn't counted (fix!)
 
     % Aerodynamics
     v_rel_vec = v_vec - wind; % Velocity relative to wind
@@ -64,7 +66,7 @@ function dy = ODESystem(t, y, p_air_0, R_spec_air, T, V_air_0, adiabatic_index_a
 
     % Forces
     F_prop_w = -m_flow_water * v_e_water_vec;
-    F_prop_air = -m_flow_air * v_e_air_vec; % + delta_p*A_nozzle*local_up;
+    F_prop_air = -m_flow_air * v_e_air_vec;
     F_g = [0; -g] * m_tot;
     F_d = -C_drag * density_amb_air * p_dynamic * A_cross_section * DirectionOf(v_rel_vec);
 
@@ -81,6 +83,5 @@ function dy = ODESystem(t, y, p_air_0, R_spec_air, T, V_air_0, adiabatic_index_a
     dy(4) = a_vec(1);
     dy(5) = a_vec(2);
     dy = dy';
-    %disp(dy);
 end
 

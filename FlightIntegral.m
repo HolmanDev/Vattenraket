@@ -40,6 +40,7 @@ function [a_vec, v_vec, s_vec, m_flow_vec] = FlightIntegral(N, dt, V_air_0, m_ro
         extra_water_pressure = density_water * 9.82 * delta_z;
         nozzle_delta_p = delta_p + extra_water_pressure;
         turbulance_ratio = 0.8 + 0.2 * p_atm/p_air; % Hur turbulent är exhausten? 1 = vatten, 0.1 = luft
+        turbulance_ratio = 1;
         density_exhaust = density_water * turbulance_ratio; % Är exhausten vatten eller vattenånga?        
         %v_e = C_discharge * sqrt(2*nozzle_delta_p / (density_exhaust * (1 - beta^4))) * -local_up;
         p_water = p_air + extra_water_pressure;
@@ -61,8 +62,8 @@ function [a_vec, v_vec, s_vec, m_flow_vec] = FlightIntegral(N, dt, V_air_0, m_ro
 
         % Massflöde       
         m_flow = norm(v_e) * A_nozzle * density_exhaust;
-        m_e = m_e + m_flow*dt;
-        is_empty = m_e >= m_fuel;
+        test_m_e = m_e + m_flow*dt;
+        is_empty = test_m_e >= m_fuel;
         %disp(p_air)
         if is_empty
             m_e = m_fuel;
@@ -88,6 +89,7 @@ function [a_vec, v_vec, s_vec, m_flow_vec] = FlightIntegral(N, dt, V_air_0, m_ro
                 m_flow_air = 0;
             end
         else
+            m_e = test_m_e;
             air_mass_at_cutoff = V_air * density_air;
         end
         m_flow_vec(i) = m_flow + m_flow_air;

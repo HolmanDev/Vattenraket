@@ -1,3 +1,5 @@
+clear;
+
 % Konstanter
 g = 9.82; % [m/s^2]
 density_w = 1000; % [kg/m^3] Saltvatten!
@@ -19,7 +21,7 @@ A_cross_section = r_bottle^2 * pi; % [m^2]
 
 figure('Position', [100 100 900 600]);
 
-n_tests = 1;
+n_tests = 4;
 volumes = linspace(0.0004, 0.0010, n_tests); % 0.8L verkar vara bäst
 for v_i = 1:n_tests  
     % Variabler
@@ -37,18 +39,19 @@ for v_i = 1:n_tests
     p_atm = 102400; % [N/m^2]
     density_amb_air = p_atm / (R_spec_ambient * T_K);
 
-    tspan = [0 10];
-    y0 = [0; 0; V_air_0; 0; 0]; % [m_e_water_0; m_e_air_0; V_air_0; v_x_0; v_y_0]
-    [t_y, y] = ode45(@(t, y) ODESystem(t, y, p_air_0, R_spec_water_vapour, T_K, V_air_0, adiabatic_index_air, adiabatic_index_w, m_body, m_fuel, density_w, density_amb_air, p_atm, A_nozzle, A_cross_section, g, bottle_height, angle, wind, C_discharge, C_drag, n), tspan, y0);
+    tspan = [0 9];
+    y0 = [0; 0; V_air_0; 0; 0]; % [m_e_water_0; m_e_air_0; V_air_0; v_x_0; v_y_0; height]
+    ODEOptions = odeset('RelTol', 1e-8);
+    [t_y, y] = ode15s(@(t, y) ODESystem(t, y, p_air_0, R_spec_water_vapour, T_K, V_air_0, adiabatic_index_air, adiabatic_index_w, m_body, m_fuel, density_w, density_amb_air, p_atm, A_nozzle, A_cross_section, g, bottle_height, angle, wind, C_discharge, C_drag, n), tspan, y0, ODEOptions);
     t_total = t_y;
+    
     velocity = [y(:, 4)'; y(:, 5)'];
     velocity_magnitudes = sqrt(velocity(1, :).^2 + velocity(2, :).^2);
-    %disp(velocity(1, :));
-    [t_x_pos, x_pos] = ode45(@(t, x_pos) interp1(t_total, velocity(1, :), t), tspan, 0);
-    [t_y_pos, y_pos] = ode45(@(t, y_pos) interp1(t_total, velocity(2, :), t), tspan, 0);
+    [t_x_pos, x_pos] = ode15s(@(t, x_pos) interp1(t_total, velocity(1, :), t), tspan, 0, ODEOptions);
+    [t_y_pos, y_pos] = ode15s(@(t, y_pos) interp1(t_total, velocity(2, :), t), tspan, 0, ODEOptions);
     y_pos_sampled = interp1(t_y_pos, y_pos, t_x_pos);
     position = [x_pos, y_pos_sampled];
-    acceleration = [diff(velocity(1, :) ./ t_total); diff(velocity(2, :) ./ t_total)];
+    acceleration = [diff(velocity(1, :) ); diff(velocity(2, :))] ./ diff(t_total');
     acceleration_magnitudes = sqrt(acceleration(1, :).^2 + acceleration(2, :).^2);
 
     subplot(2, 3, 1);
@@ -76,7 +79,6 @@ for v_i = 1:n_tests
     % Position
     subplot(2, 3, 3);
     hold on
-    disp(position(:, 1) + ", " + position(:, 2))
     plot(position(:, 1), position(:, 2));
     title("Position")
     xlabel("x [m]")
@@ -86,7 +88,7 @@ for v_i = 1:n_tests
     
     subplot(2, 3, 4);
     hold on
-    plot(0:dt:T, interp1(t_total, acceleration_magnitudes, 0:dt:T)); % v_y over time
+    plot(0:dt:T, interp1(t_total(1:(end-1)), acceleration_magnitudes, 0:dt:T)); % v_y over time
     title("Acceleration", "first " + T + " seconds")
     xlabel("t [s]")
     ylabel("a [m/s^2]")
@@ -97,7 +99,7 @@ for v_i = 1:n_tests
     subplot(2, 3, 5);
     hold on
     m_flow = diff(y(:, 1) + y(:, 2)) ./ diff(t_total);
-    plot(t_total(1:(end-1)), m_flow);
+    plot(0:dt:T, interp1(t_total(1:(end-1)), m_flow, 0:dt:T));
     title("Mass flow", "first " + T + " seconds")
     xlabel("t [s]")
     ylabel("dm/dt [kg/s]")
